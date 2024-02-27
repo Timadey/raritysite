@@ -45,7 +45,7 @@ router.get('/login', (req, res) => {
 router.get('/callback', catchAsync(async (req, res) => {
     if (!req.query.code) throw new Error('NoCodeProvided');
 	const code = req.query.code;
-	// console.log(code);
+	console.log('code', code);
 
 
 	if (code) {
@@ -57,7 +57,7 @@ router.get('/callback', catchAsync(async (req, res) => {
 					client_secret: CLIENT_SECRET,
 					code,
 					grant_type: 'authorization_code',
-					redirect_uri: `http://localhost:53134/auth/discord/callback`,
+					redirect_uri: `${HOST}/auth/discord/callback`,
 					scope: 'identify',
 				}).toString(),
 				headers: {
