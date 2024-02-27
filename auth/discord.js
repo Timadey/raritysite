@@ -1,9 +1,7 @@
 require('dotenv').config()
 const express = require('express');
-// const fetch = require('node-fetch');
-// const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+
 const { request } = require('undici');
-// const btoa = require('btoa');
 const { catchAsync } = require('../utils');
 const router = express.Router();
 
