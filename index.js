@@ -1,38 +1,39 @@
 const express = require('express');
-const { port, nft } = require('./config.json');
+const session = require('express-session');
+const { port } = require('./config.json');
+const { isAuthenticated, handleDefaultError, handleMissingView } = require('./utils');
 
 const app = express();
 
-app.get('/', (request, response) => {
-	return response.sendFile('index.html', { root: '.' });
-});
+app.set('view engine', 'ejs');
 
-// app.get('/', (request, response) => {
-// 	return response.sendFile('index.html', { root: '.' });
-// });
-
-app.get('/:nft', (request, response) => {
-    nft_page = request.params.nft
-	return response.sendFile(`${nft_page}.html`, { root: 'main' });
-});
-
-// Routes
-app.use('/auth/discord', require('./auth/discord'));
+app.use(session({
+  secret: 'raritysite-secret-key', // Replace with your secret key
+  resave: false,
+  saveUninitialized: false
+}));
 
 // Errors
-app.use((err, req, res, next) => {
-    switch (err.message) {
-      case 'NoCodeProvided':
-        return res.status(400).send({
-          status: 'ERROR',
-          error: err.message,
-        });
-      default:
-        return res.status(500).send({
-          status: 'ERROR',
-          error: err.message,
-        });
+app.use(handleMissingView);
+app.use(handleDefaultError);
+
+
+// Routes
+app.get('/', (req, res) => {
+	return res.sendFile('index.html', { root: '.' });
+});
+app.use('/auth/discord', require('./auth/discord'));
+
+app.get('/:view', (req, res) => {
+    view = req.params.view
+    user_ = req.session.user
+    if (user_){
+
+      user_.avatarSrc = `https://cdn.discordapp.com/avatars/${user_.id}/${user_.avatar}.webp`
     }
-  });
+	return res.render(`${view}`, { user: user_ });
+});
+
+
 
 app.listen(port, () => console.log(`App listening at http://localhost:${port}`));

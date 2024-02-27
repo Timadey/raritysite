@@ -3,18 +3,25 @@ const express = require('express');
 // const fetch = require('node-fetch');
 // const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const { request } = require('undici');
-const btoa = require('btoa');
+// const btoa = require('btoa');
 const { catchAsync } = require('../utils');
 const router = express.Router();
 
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const HOST = process.env.HOST;
+
 const { PORT } = require('../config.json');
 
 
-const redirect = encodeURIComponent('http://localhost:53134/auth/discord/callback');
+const redirect = encodeURIComponent(`${HOST}/auth/discord/callback`);
 
 router.get('/login', (req, res) => {
+	const currentPage = req.query.next
+	console.log('next url', currentPage)
+	if (currentPage) {
+		req.session.nextUrl = currentPage 
+	}
   res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${CLIENT_ID}&scope=identify&response_type=code&redirect_uri=${redirect}`);
 });
 
@@ -40,7 +47,7 @@ router.get('/login', (req, res) => {
 router.get('/callback', catchAsync(async (req, res) => {
     if (!req.query.code) throw new Error('NoCodeProvided');
 	const code = req.query.code;
-	console.log(code);
+	// console.log(code);
 
 
 	if (code) {
@@ -67,7 +74,17 @@ router.get('/callback', catchAsync(async (req, res) => {
                     authorization: `${oauthData.token_type} ${oauthData.access_token}`,
                 },
             });
-			console.log(await userResult.body.json());
+			discordUser = await userResult.body.json()
+			console.log('discorduser...', discordUser)
+			req.session.user = discordUser
+			console.log(req.session.user);
+
+			if (req.session.nextUrl){
+				res.redirect(req.session.nextUrl)
+			}else {
+				res.redirect('/');
+			};
+
             
 		} catch (error) {
 			// NOTE: An unauthorized token will not throw an error
@@ -76,6 +93,5 @@ router.get('/callback', catchAsync(async (req, res) => {
 		}
 	}
 
-	res.redirect('/');
-}));
+	}));
 module.exports = router;
