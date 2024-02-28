@@ -26,6 +26,7 @@ var getUserOrLogin = function (req, res, next) {
       next();
     } else {
       res.redirect('/login');
+
     }
   };
 

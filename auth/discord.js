@@ -14,14 +14,7 @@ const { PORT } = require('../config.json');
 
 const redirect = encodeURIComponent(`${HOST}/auth/discord/callback`);
 
-router.get('/login', (req, res) => {
-	const currentPage = req.query.next
-	console.log('next url', currentPage)
-	if (currentPage) {
-		req.session.nextUrl = currentPage 
-	}
-  res.redirect(`https://discordapp.com/oauth2/authorize?client_id=${CLIENT_ID}&scope=identify&response_type=code&redirect_uri=${redirect}`);
-});
+
 
 // router.get('/callback', catchAsync(async (req, res) => {
 //     if (!req.query.code) throw new Error('NoCodeProvided');
